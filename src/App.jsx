@@ -13,17 +13,45 @@ import Game from './components/Game';
 import GameOver from './components/GameOver';
 
 const stages = [
-   {id: 1, name: "start"},
-   {id: 2, name: "game"},
-   {id: 3, name: "end"},
+   { id: 1, name: "start" },
+   { id: 2, name: "game" },
+   { id: 3, name: "end" },
 ];
 
 function App() {
    const [gameStage, setGameStage] = useState(stages[0].name);
    const [words] = useState(wordsList);
 
+   const [pickedCategory, setPickedCategory] = useState('');
+   const [pickedWord, setPickedWord] = useState('');
+   const [letters, setLetters] = useState([]);
+
+   const pickWordAndCategory = () => {
+      const categories = Object.keys(words);
+
+      // Função que retorna uma categoria aleatória
+      const category = categories[Math.floor(Math.random() * categories.length)];
+      // Função que retorna uma palavra aleatória da categoria escolhida
+      const word = words[category][Math.floor(Math.random() * words[category].length)];
+      //Utilizamos a função Math.floor para arredondar o número para baixo e Math.random para gerar um número aleatório entre 0 e 1.
+
+      return { category, word };
+   }
+
    //Inicializa o jogo
    const startGame = () => {
+      // Seleciona a categoria e a palavra.
+      const { word, category } = pickWordAndCategory();
+      
+      // Criando uma array com as letras da palavra escolhida
+      let wordLetters = word.split('')
+      wordLetters = wordLetters.map((letter) => letter.toLowerCase());
+      
+      // Preenchendo os estados com as informações.
+      setPickedCategory(category);
+      setPickedWord(word);
+      setLetters(letters);
+
       setGameStage(stages[1].name);
    }
 
@@ -39,9 +67,9 @@ function App() {
 
    return (
       <div className='App'>
-         { gameStage === 'start' && <StartScreen startGame={startGame} /> }
-         { gameStage === 'game' && <Game verifyLetter={verifyLetter} /> }
-         { gameStage === 'end' && <GameOver restart={restartGame} /> }
+         {gameStage === 'start' && <StartScreen startGame={startGame} />}
+         {gameStage === 'game' && <Game verifyLetter={verifyLetter} />}
+         {gameStage === 'end' && <GameOver restart={restartGame} />}
       </div>
    )
 }
