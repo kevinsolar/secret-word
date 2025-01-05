@@ -1,4 +1,5 @@
 import './Game.css';
+import { useState, useRef } from 'react';
 
 const Game = ({
    verifyLetter,
@@ -10,6 +11,20 @@ const Game = ({
    tentativas,
    pontuacao
 }) => {
+
+   const [letter, setLetter] = useState('');
+   const letterInputRef = useRef(null);
+
+   const handleSubmit = (event) => {
+      event.preventDefault();
+      verifyLetter(letter);
+      setLetter("");
+
+      // Usando o Ref do React, que tem a função parecida com o document.querySelector, faço ele focar no input novamente com o .current.focus() do JS.
+      letterInputRef.current.focus();
+   }
+
+
    return (
       <div className='game'>
          <p className="points">
@@ -32,8 +47,17 @@ const Game = ({
 
          <div className="letterContainer">
             <p>Tente advinhar uma letra da palavra:</p>
-            <form>
-               <input type="text" name='letter' maxLength="1" placeholder='_' required />
+            <form onSubmit={handleSubmit}>
+               <input
+                  type="text"
+                  name='letter'
+                  maxLength="1"
+                  placeholder='_'
+                  required
+                  onChange={(e) => setLetter(e.target.value)}
+                  value={letter}
+                  ref={letterInputRef}
+               />
                <button className="btn-default">Tentar</button>
             </form>
          </div>
