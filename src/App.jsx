@@ -33,7 +33,7 @@ function App() {
 	const [tentativas, setTentativas] = useState(quantidadeTentativas);
 	const [pontuacao, setPontuacao] = useState(0);
 
-	const pickWordAndCategory = () => {
+	const pickWordAndCategory = useCallback(() => {
 		const categories = Object.keys(words);
 
 		// Função que retorna uma categoria aleatória
@@ -45,10 +45,13 @@ function App() {
 		//Utilizamos a função Math.floor para arredondar o número para baixo e Math.random para gerar um número aleatório entre 0 e 1.
 
 		return { category, word };
-	};
+	}, [words]);
 
 	//Inicializa o jogo
-	const startGame = () => {
+	const startGame = useCallback(() => {
+		// Vamos adicionar a limpeza das letras já utilizadas aqui, para evitar de começar novamente o jogo em casa de WIN, com letras já utilizadas antes...
+		clearLetterStates();
+
 		// Seleciona a categoria e a palavra.
 		const { word, category } = pickWordAndCategory();
 
@@ -62,7 +65,7 @@ function App() {
 		setLetters(wordLetters);
 
 		setGameStage(stages[1].name);
-	};
+	}, [pickWordAndCategory]);
 
 	// Processa o input do usuário
 	const verifyLetter = (letter) => {
@@ -94,6 +97,7 @@ function App() {
 		setLetrasErradas([]);
 	};
 
+	//Verifica tentativas
 	useEffect(() => {
 		if (tentativas <= 0) {
 			//Reset all states
@@ -103,10 +107,22 @@ function App() {
 		}
 	}, [tentativas]);
 
+	//Verifica se ganhou
+	useEffect(() => {
+		const letrasUnicas = [...new Set(letters)];
+
+		//Condição de vitória
+		if (letrasAdvinhadas.length === letrasUnicas.length && gameStage === stages[1].name) {
+			//Add potuacao max
+			setPontuacao((actualPontuacao) => (actualPontuacao += 100));
+			startGame();
+		}
+	}, [letrasAdvinhadas, letters, startGame]);
+
 	// Reinicia o jogo
 	const restartGame = () => {
-      setPontuacao(0);
-      setTentativas(quantidadeTentativas);
+		setPontuacao(0);
+		setTentativas(quantidadeTentativas);
 
 		setGameStage(stages[0].name);
 	};
@@ -126,7 +142,9 @@ function App() {
 					pontuacao={pontuacao}
 				/>
 			)}
-			{gameStage === "end" && <GameOver restart={restartGame} />}
+			{gameStage === "end" && (
+				<GameOver restart={restartGame} pontuacao={pontuacao} />
+			)}
 		</div>
 	);
 }
